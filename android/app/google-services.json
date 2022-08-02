@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "952065869437",
+    "project_id": "integrity100-61930",
+    "storage_bucket": "integrity100-61930.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:952065869437:android:8ad006548b6b2742d65314",
+        "android_client_info": {
+          "package_name": "com.example.integrity"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "952065869437-oar3poa4mda35fj02u85aonsuqf0l4f6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdYWLkTcrI6bN5L4snJThsa1ll9l-qGN8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "952065869437-oar3poa4mda35fj02u85aonsuqf0l4f6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
