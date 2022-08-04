@@ -1,13 +1,23 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:integrity/screens/reviewer/success_register.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
+
 class Verify_otp extends StatefulWidget {
-  Verify_otp({Key? key}) : super(key: key);
+  var phoneNumber;
+  var countryCode;
+  var verId;
+  Verify_otp(
+   { this.phoneNumber,
+    this.verId,
+    this.countryCode
+   }
+  );
 
   @override
   State<Verify_otp> createState() => _Verify_otpState();
@@ -26,8 +36,31 @@ class _Verify_otpState extends State<Verify_otp> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final formKey = GlobalKey<FormState>();
 
+  late Timer _timer;
+int _start = 20;
+
+void startTimer() {
+  const oneSec = const Duration(seconds: 1);
+  _timer = new Timer.periodic(
+    oneSec,
+    (Timer timer) {
+      if (_start == 0) {
+        setState(() {
+          timer.cancel();
+        });
+      } else {
+        setState(() {
+          _start--;
+        });
+      }
+    },
+  );
+}
+
+
   @override
   void initState() {
+    startTimer();
     onTapRecognizer = TapGestureRecognizer()
       ..onTap = () {
         Navigator.pop(context);
@@ -41,6 +74,56 @@ class _Verify_otpState extends State<Verify_otp> {
     errorController.close();
 
     super.dispose();
+  }
+
+  Future<void> verifyOtp(var v) async{
+   
+   try{
+await FirebaseAuth.instance.signInWithCredential(
+      PhoneAuthProvider.credential(
+        verificationId: widget.verId, 
+        smsCode: v
+        )
+        ) .then((value){
+          print(value);
+    Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Success()));
+        });
+   } catch (e){
+     errorController.add(ErrorAnimationType.shake); 
+
+   }
+    
+  }
+   Future<void> ResendOtp(var number) async{
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: number,
+        // timeout: const Duration(seconds: 20),
+        verificationCompleted: (PhoneAuthCredential credential)async{
+          await FirebaseAuth.instance.signInWithCredential(credential).then((value) => print('logged in'));
+        }, 
+        verificationFailed: (FirebaseAuthException e){
+          showSnackBarText("can't send code check if you have typed correct number");
+        }, 
+        codeSent: (String verificationId, int? resendToken) {
+        widget.verId=verificationId;
+        setState(() {
+          // screenState = 1;
+          
+        });
+      },
+      codeAutoRetrievalTimeout: (String verificationId){
+        
+      });
+    }
+    
+  void showSnackBarText(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(text),
+      ),
+    );
   }
   @override
   Widget build(BuildContext context) {
@@ -69,14 +152,14 @@ class _Verify_otpState extends State<Verify_otp> {
                    
                   ),),
                   SizedBox(height:5),
-                  Text('+2253432'),
+                  Text(widget.countryCode +" "+ widget.phoneNumber.text),
                   SizedBox(
                     height: 50,
                   ),
                 Container(
-                  width: MediaQuery.of(context).size.width*0.7,
+                  width: MediaQuery.of(context).size.width*0.9,
                   child: PinCodeTextField(
-                    length: 4,
+                    length: 6,
                     obscureText: false,
                     animationType: AnimationType.fade,
                     pinTheme: PinTheme(
@@ -96,14 +179,9 @@ class _Verify_otpState extends State<Verify_otp> {
                     errorAnimationController: errorController,
                     controller: textEditingController,
                     onCompleted: (v) {
-                      print("Completed");
-                       Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => Success()),
-                              );
                     },
                     onChanged: (value) {
-                      print(value);
+                      
                       setState(() {
                         currentText = value;
                       });
@@ -117,10 +195,53 @@ class _Verify_otpState extends State<Verify_otp> {
                   ),
                   ),
                   SizedBox(height:50),
-                  Text("Resent OTP in 00:20?",style: TextStyle(
-                    color: Colors.green[900],
-                    fontWeight: FontWeight.w400
-                  ),)
+                  Container(
+                   
+                       decoration: BoxDecoration(
+                         borderRadius: BorderRadius.all(Radius.circular(10)),
+                             color: Colors.blue,
+                       ),
+                       width: MediaQuery.of(context).size.width*0.7,
+                       height: 60,
+                         child: TextButton(
+                          
+                          onPressed: (){
+                            // print(countryCode+PhoneController.text);
+                            if(currentText.length>=6){
+                              verifyOtp(currentText);
+                            }else{
+                              errorController.add(ErrorAnimationType.shake); 
+                            }
+                               
+                            
+                          }, child: Text("VERIFY",style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white
+                          ),)),
+                       ),
+                  SizedBox(height:30),
+                 
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Resent OTP in 00:${_start}?",style: TextStyle(
+                        color: Colors.green[900],
+                        fontWeight: FontWeight.w400
+                      ),),
+                      Visibility(
+                        visible: _start==0?true:false,
+                        child: TextButton(
+                          onPressed: (){
+                            ResendOtp(widget.countryCode+widget.phoneNumber.text);
+                            _start=20;
+                            startTimer();
+                            
+                          }, 
+                          child: Text('RESEND')),
+                      )
+                    ],
+                  )
                  
                 ],
               ),
