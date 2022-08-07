@@ -4,7 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:integrity/screens/first_page.dart';
 import 'package:flutter/cupertino.dart';
-
+import 'package:integrity/screens/login_page.dart';
+import 'package:is_first_run/is_first_run.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +40,7 @@ class Home extends StatefulWidget{
 }
 
 class HomePage extends State<Home>{
+  late bool firstRun;
   @override
   void initState() {
     // TODO: implement initState
@@ -46,12 +48,14 @@ class HomePage extends State<Home>{
     StartTime();
   }
 Future<Timer> StartTime()async{
+    firstRun = await IsFirstRun.isFirstRun();
 var duration=Duration(milliseconds: 1500);
 return Timer(duration, route);
 }
  
- route(){
-  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>First_page()));
+ route()async{
+
+  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>firstRun? First_page():LogIn_page()));
  }
 
   Widget build(BuildContext context) {

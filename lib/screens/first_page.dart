@@ -36,17 +36,17 @@ class _First_pageState extends State<First_page> {
                   
                   child: Column(
                     children:  [
-                     Text("I am a...",style: TextStyle(
+                     const Text("I am a...",style: TextStyle(
                       fontSize: 30,
                       color: Colors.blueGrey,
                       fontWeight: FontWeight.w700
                      ),),
-                     SizedBox(
+                     const SizedBox(
                       height: 30,
                      ),
                      Container(
                  
-                     decoration: BoxDecoration(
+                     decoration: const BoxDecoration(
                        borderRadius: BorderRadius.all(Radius.circular(10)),
                            color: Colors.blueAccent,
                      ),
@@ -59,13 +59,13 @@ class _First_pageState extends State<First_page> {
                               context,
                               MaterialPageRoute(builder: (context) => Register()),
                             );
-                        }, child: Text("REVIEWER",style: TextStyle(
+                        }, child: const Text("REVIEWER",style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: Colors.white
                         ),)),
                      ),
-                     SizedBox(
+                     const SizedBox(
                       height: 20,
                      ),
                      Container(
@@ -76,7 +76,7 @@ class _First_pageState extends State<First_page> {
                      
                       width: MediaQuery.of(context).size.width*0.7,
                       height: 60,
-                      child: TextButton(onPressed: (){}, child: Text("SERVICE PROVIDER",
+                      child: TextButton(onPressed: (){}, child: const Text("SERVICE PROVIDER",
                       style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,

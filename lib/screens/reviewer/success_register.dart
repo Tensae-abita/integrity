@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:integrity/main.dart';
+import 'package:integrity/screens/reviewer/Reviewer_pages/home_page.dart';
 
 
 class Success extends StatelessWidget {
@@ -52,10 +54,10 @@ class Success extends StatelessWidget {
                          child: TextButton(
                           
                           onPressed: (){
-                            //  Navigator.push(
-                            //     context,
-                            //     MaterialPageRoute(builder: (context) => Register()),
-                            //   );
+                             Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => Reviewer_Home_Page()),
+                              );
                           }, child: const Text("EXPLORE NOW",style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,

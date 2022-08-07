@@ -1,6 +1,10 @@
+
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:integrity/screens/login_page.dart';
 import 'package:integrity/screens/reviewer/verify_otp.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
@@ -15,20 +19,34 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
     GlobalKey<FormState> _formKey = GlobalKey();
     TextEditingController PhoneController=TextEditingController();
+  final _fireStore = FirebaseFirestore.instance;
+
     var countryCode ="+251";
     var PhoneNUmber="";
     var verId='';
+    bool errorVisible=false;
+   
 
     Future<void> verifyPhone(var number) async{
-     
-setState(() {
-   modal=true;
-});
-      await FirebaseAuth.instance.verifyPhoneNumber(
+      setState(() {
+            modal=true;
+          });
+      await for (var snapshot in _fireStore.collection('users').snapshots()) {
+      for (var message in snapshot.docs) {
+        print(message.data()['phone']);
+        if(message.data()['phone']==countryCode+PhoneController.text){
+          // print('already a user');
+          setState(() {
+            modal=false;
+            errorVisible=true;
+          });
+        }else {
+        
+        await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: number,
         // timeout: const Duration(seconds: 20),
         verificationCompleted: (PhoneAuthCredential credential)async{
-          await FirebaseAuth.instance.signInWithCredential(credential).then((value) => print('logged in'));
+          // await FirebaseAuth.instance.signInWithCredential(credential).then((value) => print('logged in'));
           modal=false;
         }, 
         verificationFailed: (FirebaseAuthException e){
@@ -57,6 +75,43 @@ setState(() {
       codeAutoRetrievalTimeout: (String verificationId){
 
       });
+        }
+      }
+    }
+          
+      // await FirebaseAuth.instance.verifyPhoneNumber(
+      //   phoneNumber: number,
+      //   // timeout: const Duration(seconds: 20),
+      //   verificationCompleted: (PhoneAuthCredential credential)async{
+      //     // await FirebaseAuth.instance.signInWithCredential(credential).then((value) => print('logged in'));
+      //     modal=false;
+      //   }, 
+      //   verificationFailed: (FirebaseAuthException e){
+      //     setState(() {
+      //         modal=false;
+      //       });
+           
+      //     showSnackBarText("can't send code check if you have typed correct number");
+
+      //   }, 
+      //   codeSent: (String verificationId, int? resendToken) {
+      //   verId = verificationId;
+      //   setState(() {
+      //     // screenState = 1;
+      //     modal=false;
+      //       Navigator.push(
+      //           context,
+      //           MaterialPageRoute(builder: (context) => Verify_otp(
+      //             phoneNumber: PhoneController,
+      //             countryCode: countryCode,
+      //             verId: verId,
+      //           )),
+      //         );
+      //   });
+      // },
+      // codeAutoRetrievalTimeout: (String verificationId){
+
+      // });
     }
     bool modal=false;
 
@@ -124,6 +179,33 @@ setState(() {
                             onChanged: (phone) {
                                 // print(phone.completeNumber);
                             },
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width*0.7,
+                      child: Visibility(
+                        visible: errorVisible,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                              Column(
+                                children: [
+                                  Text("Acount already exists",style: TextStyle(color: Colors.red),),
+                                   Text("with this number",
+                              style: TextStyle(color: Colors.red),),
+                                ],
+                              ),
+                             
+                            TextButton(
+                              onPressed: (){
+                                  Navigator.push(
+                               context,
+                                MaterialPageRoute(builder: (context) => LogIn_page()),
+                              ); 
+                              },
+                               child: Text('Log In'))
+                          ],
                         ),
                       ),
                     ),
