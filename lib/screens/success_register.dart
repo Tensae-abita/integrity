@@ -5,7 +5,10 @@ import 'package:integrity/screens/reviewer/Reviewer_pages/home_page.dart';
 
 
 class Success extends StatelessWidget {
-  const Success({Key? key}) : super(key: key);
+  var userType;
+   Success({
+   required this.userType
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -54,9 +57,10 @@ class Success extends StatelessWidget {
                          child: TextButton(
                           
                           onPressed: (){
-                             Navigator.push(
+                             Navigator.pushReplacement(
                                 context,
-                                MaterialPageRoute(builder: (context) => Reviewer_Home_Page()),
+                                MaterialPageRoute(builder: (context) => userType=="Reviewer"? Reviewer_Home_Page():Reviewer_Home_Page()
+                                 )
                               );
                           }, child: const Text("EXPLORE NOW",style: TextStyle(
                             fontSize: 15,

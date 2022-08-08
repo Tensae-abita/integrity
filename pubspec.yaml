@@ -41,6 +41,8 @@ dependencies:
   cloud_firestore: ^3.4.3
   is_first_run: ^1.0.0
   pin_code_fields: ^7.4.0
+  passwordfield: ^0.1.0
+  crypto: ^3.0.2
   
 
 

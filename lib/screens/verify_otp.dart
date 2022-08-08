@@ -4,8 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:integrity/screens/reviewer/enter_password.dart';
-import 'package:integrity/screens/reviewer/success_register.dart';
+import 'package:integrity/screens/enter_password.dart';
+import 'package:integrity/screens/first_page.dart';
+// import 'package:integrity/screens/reviewer/auth.dart';
+// import 'package:integrity/screens/reviewer/enter_password.dart';
+// import 'package:integrity/screens/reviewer/success_register.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -15,10 +18,13 @@ class Verify_otp extends StatefulWidget {
   var phoneNumber;
   var countryCode;
   var verId;
+  var userType;
   Verify_otp(
    { this.phoneNumber,
+    required this.userType,
     this.verId,
     this.countryCode
+    
    }
   );
 
@@ -91,20 +97,13 @@ await FirebaseAuth.instance.signInWithCredential(
         )
         ) .then((value)async{
           print(value);
-    Navigator.push(
+    Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => EnterPassword()));
+                MaterialPageRoute(builder: (context) => EnterPassword(
+                  userType: widget.userType,
+                  phoneNumber:widget.countryCode + widget.phoneNumber.text,)));
 
-                  try {
-                        await _fireStore.collection('users').add(
-                            {'phone': widget.countryCode.toString()+widget.phoneNumber.toString(),
-                             
-                             "usertype":'reviewer',
-                             });
-                        print('done');
-                      } catch (e) {
-                        print(e);
-                      }
+               
         }
         );
    } catch (e){
@@ -229,16 +228,7 @@ await FirebaseAuth.instance.signInWithCredential(
                             if(currentText.length>=6){
                               verifyOtp(currentText);
                               
-                  try {
-                        await _fireStore.collection('users').add(
-                            {'phone':  widget.countryCode+widget.phoneNumber.text,
-                             'username': "tensu",
-                             "usertype":'reviewer',
-                             "password":"123456"});
-                        print('done');
-                      } catch (e) {
-                        print(e);
-                      }
+              
                             }else{
                               errorController.add(ErrorAnimationType.shake); 
                             }
@@ -271,8 +261,12 @@ await FirebaseAuth.instance.signInWithCredential(
                           child: Text('RESEND')),
                       )
                     ],
-                  )
-                 
+                  ),
+                 TextButton(
+                  onPressed: (){
+                    Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => First_page()));
+                  }, 
+                  child: Text("Change Number"))
                 ],
               ),
             ),

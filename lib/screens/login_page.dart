@@ -1,9 +1,15 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:integrity/screens/first_page.dart';
 import 'package:integrity/screens/reviewer/Reviewer_pages/home_page.dart';
-import 'package:integrity/screens/reviewer/auth.dart';
+import 'package:integrity/screens/service_provider/service_home_page.dart';
+// import 'package:integrity/screens/reviewer/auth.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:passwordfield/passwordfield.dart';
 
 class LogIn_page extends StatefulWidget {
   LogIn_page({Key? key}) : super(key: key);
@@ -26,25 +32,57 @@ class _LogIn_pageState extends State<LogIn_page> {
   bool modal=false;
 
   Future<void> userSignIn() async {
-    await for (var snapshot in _fireStore.collection('users').snapshots()) {
-      for (var message in snapshot.docs) {
-        print(message.data()['phone']);
-        if(message.data()['phone']==countryCode+PhoneController.text && message.data()['password']== PasswordController.text) {
-               
-           if(message.data()["usertype"]=="reviewer")  {
-           Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Reviewer_Home_Page()));
-           }   else {
+    var bytes = utf8.encode(PasswordController.text); // data being hashed
 
+  var digest = sha256.convert(bytes);
+    setState(() {
+      
+      modal=true;
+    });
+    await  _fireStore.collection('users') .where('phone', isEqualTo:countryCode+ PhoneController.text,)
+          .get()
+          .then((value) async { if(value.size > 0 ){
+            for(var data in value.docs){
+              // print(PasswordController.text)  ;
+              if(digest==data.data()['password']){
+                print('match');
+                  setState(() {
+                    modal=false;
+                  });
+                  if(data.data()['usertype']=="Reviewer"){
+                  Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => Reviewer_Home_Page()));
 
-           }
-            
-        } else{
-          print("user name and password dont match");
-        }
-        }}
+                  }else if(data.data()['usertype']=="Service Provider"){
+                  Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => Provider_Home_Page()));
+
+                  }
+
+              }else if(digest!=data.data()['password']){
+                 setState(() {
+                    modal=false;
+                  });
+              showSnackBarText('UserName and Password Do not match');
+
+              }
+            }
+            }else{
+               setState(() {
+                    modal=false;
+                  });
+              showSnackBarText('UserName and Password Do not match');
+            }
+          });
   }
+
+  
+    void showSnackBarText(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(text),
+      ),
+    );
+  }
+ 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -95,7 +133,7 @@ class _LogIn_pageState extends State<LogIn_page> {
                             initialValue: countryCode,
                             onCountryChanged: (country){
                               setState(() {
-                                countryCode="+" +country.dialCode;
+                                countryCode="+${country.dialCode}";
                               });
                               
                             },
@@ -106,36 +144,67 @@ class _LogIn_pageState extends State<LogIn_page> {
                       ),
                       
                     ),
-                  Container(
-                    width: MediaQuery.of(context).size.width*0.7,
+                       Container(
+                        width: MediaQuery.of(context).size.width*0.7,
+                         child: PasswordField(
+                      controller: PasswordController,
+  color: Colors.blue,
+  passwordConstraint: r'.*[@$#.*].*',
+  inputDecoration: PasswordDecoration(),
+  hintText: 'must have special characters',
+  border: PasswordBorder(
+    border: OutlineInputBorder(
+      borderSide: BorderSide(
+        color: Colors.blue.shade100,
+      ),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderSide: BorderSide(
+        color: Colors.blue.shade100,
+      ),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide:
+          BorderSide(width: 2, color: Colors.red.shade200),
+    ),
+  ),
+  errorMessage:
+      'must contain special character either . * @ # \$',
+),
+                       ),
+                  // Container(
+                  //   width: MediaQuery.of(context).size.width*0.7,
                    
-                    child: TextField(
-                    controller: PasswordController,
-                    obscureText: true,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.blueGrey),
-                    onChanged: (value) {
-                      // password = value;
-                      //Do something with the user input.
-                    },
-                    decoration: InputDecoration(
+                  //   child: TextField(
+                  //   controller: PasswordController,
+                  //   obscureText: true,
+                  //   textAlign: TextAlign.center,
+                  //   style: TextStyle(color: Colors.blueGrey),
+                  //   onChanged: (value) {
+                  //     // password = value;
+                  //     //Do something with the user input.
+                  //   },
+                  //   decoration: InputDecoration(
                       
-                                hintStyle: TextStyle(color: Colors.blueGrey),
-                                hintText: 'Enter your password.',
-                                contentPadding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.blueGrey, width: 1.0),
-                                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey, width: 2.0),
-                                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                                ),
-                              )),
-                  ),
+                  //               hintStyle: TextStyle(color: Colors.blueGrey),
+                  //               hintText: 'Enter your password.',
+                  //               contentPadding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
+                  //               border: OutlineInputBorder(
+                  //                 borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                  //               ),
+                  //               enabledBorder: OutlineInputBorder(
+                  //                 borderSide: BorderSide(color: Colors.blueGrey, width: 1.0),
+                  //                 borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                  //               ),
+                  //               focusedBorder: OutlineInputBorder(
+                  //                 borderSide: BorderSide(color: Colors.grey, width: 2.0),
+                  //                 borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                  //               ),
+                  //             )),
+                  // ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -161,6 +230,7 @@ class _LogIn_pageState extends State<LogIn_page> {
                             
                             onPressed: (){
                               userSignIn();
+                              
                             //   // print(countryCode+PhoneController.text);
                             //     var val=_formKey.currentState?.validate();
                             //   if (val ==true){
@@ -182,7 +252,7 @@ class _LogIn_pageState extends State<LogIn_page> {
                         onPressed: (){
                            Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Register()));
+                MaterialPageRoute(builder: (context) => First_page()));
                         }, 
                         child: Text("Create"))
                     ],

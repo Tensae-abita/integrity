@@ -5,12 +5,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:integrity/screens/login_page.dart';
-import 'package:integrity/screens/reviewer/verify_otp.dart';
+// import 'package:integrity/screens/reviewer/verify_otp.dart';
+import 'package:integrity/screens/verify_otp.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 class Register extends StatefulWidget {
-  Register({Key? key}) : super(key: key);
+  String userType;
+  Register({
+    required this.userType
+  });
 
   @override
   State<Register> createState() => _RegisterState();
@@ -30,19 +34,41 @@ class _RegisterState extends State<Register> {
     Future<void> verifyPhone(var number) async{
       setState(() {
             modal=true;
+            errorVisible=false;
           });
-      await for (var snapshot in _fireStore.collection('users').snapshots()) {
-      for (var message in snapshot.docs) {
-        print(message.data()['phone']);
-        if(message.data()['phone']==countryCode+PhoneController.text){
-          // print('already a user');
-          setState(() {
-            modal=false;
-            errorVisible=true;
+      await  _fireStore.collection('users') .where('phone', isEqualTo: number)
+          .get()
+          .then((value) async { if(value.size > 0 ){
+           
+           for(var data in value.docs){
+              print(data.data()['usertype']);
+              if(widget.userType==data.data()['usertype']){
+                 setState(() {
+                  modal=false;
+                  errorVisible=true;
+                });
+                showSnackBarText('can not have multiple accounts as ${widget.userType}');
+                // print('match');
+                //   Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => Reviewer_Home_Page()));
+              }else if(widget.userType!=data.data()['usertype']){
+              auth(number);
+
+              }}
+          
+          }else{
+      auth(number);
+            
+          }
+          
           });
-        }else {
         
-        await FirebaseAuth.instance.verifyPhoneNumber(
+        
+       
+        
+      }
+
+      Future<void> auth(var number)async{
+           await   FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: number,
         // timeout: const Duration(seconds: 20),
         verificationCompleted: (PhoneAuthCredential credential)async{
@@ -62,12 +88,13 @@ class _RegisterState extends State<Register> {
         setState(() {
           // screenState = 1;
           modal=false;
-            Navigator.push(
+            Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => Verify_otp(
                   phoneNumber: PhoneController,
                   countryCode: countryCode,
                   verId: verId,
+                  userType: widget.userType,
                 )),
               );
         });
@@ -75,9 +102,8 @@ class _RegisterState extends State<Register> {
       codeAutoRetrievalTimeout: (String verificationId){
 
       });
-        }
       }
-    }
+    
           
       // await FirebaseAuth.instance.verifyPhoneNumber(
       //   phoneNumber: number,
@@ -112,7 +138,7 @@ class _RegisterState extends State<Register> {
       // codeAutoRetrievalTimeout: (String verificationId){
 
       // });
-    }
+    
     bool modal=false;
 
     void showSnackBarText(String text) {
@@ -191,8 +217,8 @@ class _RegisterState extends State<Register> {
                           children: [
                               Column(
                                 children: [
-                                  Text("Acount already exists",style: TextStyle(color: Colors.red),),
-                                   Text("with this number",
+                                  Text("Acount already exists as a ",style: TextStyle(color: Colors.red),),
+                                   Text(" with this number",
                               style: TextStyle(color: Colors.red),),
                                 ],
                               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:integrity/screens/reviewer/auth.dart';
+import 'package:integrity/screens/auth.dart';
+// import 'package:integrity/screens/reviewer/auth.dart';
 
 
 class First_page extends StatefulWidget {
@@ -57,7 +58,7 @@ class _First_pageState extends State<First_page> {
                         onPressed: (){
                            Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => Register()),
+                              MaterialPageRoute(builder: (context) => Register(userType: 'Reviewer',)),
                             );
                         }, child: const Text("REVIEWER",style: TextStyle(
                           fontSize: 15,
@@ -76,7 +77,12 @@ class _First_pageState extends State<First_page> {
                      
                       width: MediaQuery.of(context).size.width*0.7,
                       height: 60,
-                      child: TextButton(onPressed: (){}, child: const Text("SERVICE PROVIDER",
+                      child: TextButton(onPressed: (){
+                         Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Register(userType: 'Service Provider',)),
+                            );
+                      }, child: const Text("SERVICE PROVIDER",
                       style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
