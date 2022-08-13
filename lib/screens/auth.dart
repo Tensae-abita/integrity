@@ -236,19 +236,7 @@ class _RegisterState extends State<Register> {
                         ),
                       ),
                     ),
-                     Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('I already have an account'),
-                      TextButton(
-                        onPressed: (){
-                           Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LogIn_page()));
-                        }, 
-                        child: Text("Log In"))
-                    ],
-                  ),
+                    
                     Container(
                       width: MediaQuery.of(context).size.width*0.7,
                       child: Visibility(
@@ -276,6 +264,19 @@ class _RegisterState extends State<Register> {
                         ),
                       ),
                     ),
+                     Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('I already have an account'),
+                      TextButton(
+                        onPressed: (){
+                           Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LogIn_page()));
+                        }, 
+                        child: Text("Log In"))
+                    ],
+                  ),
                     SizedBox(
                       height: 40,
                     ),
