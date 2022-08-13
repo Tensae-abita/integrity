@@ -19,9 +19,11 @@ class Verify_otp extends StatefulWidget {
   var countryCode;
   var verId;
   var userType;
+  var isRecovering =false;
   Verify_otp(
    { this.phoneNumber,
-    required this.userType,
+   required this.isRecovering,
+    this.userType,
     this.verId,
     this.countryCode
     
@@ -83,8 +85,10 @@ void startTimer() {
   @override
   void dispose() {
     errorController.close();
-
+    
     super.dispose();
+     
+  _timer.cancel();
   }
 
   Future<void> verifyOtp(var v) async{
@@ -97,16 +101,20 @@ await FirebaseAuth.instance.signInWithCredential(
         )
         ) .then((value)async{
           print(value);
+          print('verified');
     Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => EnterPassword(
+                  isRecovering: widget.isRecovering,
                   userType: widget.userType,
-                  phoneNumber:widget.countryCode + widget.phoneNumber.text,)));
+                  phoneNumber:widget.phoneNumber,)));
 
                
         }
         );
    } catch (e){
+
+   
      errorController.add(ErrorAnimationType.shake); 
 
    }
@@ -168,7 +176,7 @@ await FirebaseAuth.instance.signInWithCredential(
                    
                   ),),
                   SizedBox(height:5),
-                  Text(widget.countryCode +" "+ widget.phoneNumber.text),
+                  Text(!widget.isRecovering? widget.countryCode +" "+ widget.phoneNumber.text:widget.phoneNumber),
                   SizedBox(
                     height: 50,
                   ),
@@ -264,7 +272,9 @@ await FirebaseAuth.instance.signInWithCredential(
                   ),
                  TextButton(
                   onPressed: (){
-                    Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => First_page()));
+                    Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => First_page(
+                      isRecovoring: false,
+                    )));
                   }, 
                   child: Text("Change Number"))
                 ],

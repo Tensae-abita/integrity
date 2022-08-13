@@ -2,14 +2,18 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:integrity/screens/first_page.dart';
 import 'package:integrity/screens/reviewer/Reviewer_pages/home_page.dart';
 import 'package:integrity/screens/service_provider/service_home_page.dart';
+import 'package:integrity/screens/verify_otp.dart';
 // import 'package:integrity/screens/reviewer/auth.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
-import 'package:passwordfield/passwordfield.dart';
+import 'package:password_text_field/password_text_field.dart';
+
+
 
 class LogIn_page extends StatefulWidget {
   LogIn_page({Key? key}) : super(key: key);
@@ -28,6 +32,8 @@ class _LogIn_pageState extends State<LogIn_page> {
     var countryCode ="+251";
     var PhoneNUmber="";
     var verId='';
+    var userType='';
+    var isMultipleAcount;
 
   bool modal=false;
 
@@ -39,12 +45,14 @@ class _LogIn_pageState extends State<LogIn_page> {
       
       modal=true;
     });
+    print(digest);
     await  _fireStore.collection('users') .where('phone', isEqualTo:countryCode+ PhoneController.text,)
           .get()
           .then((value) async { if(value.size > 0 ){
             for(var data in value.docs){
+              
               // print(PasswordController.text)  ;
-              if(digest==data.data()['password']){
+              if(digest.toString()==data.data()['password']){
                 print('match');
                   setState(() {
                     modal=false;
@@ -56,12 +64,6 @@ class _LogIn_pageState extends State<LogIn_page> {
                   Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => Provider_Home_Page()));
 
                   }
-
-              }else if(digest!=data.data()['password']){
-                 setState(() {
-                    modal=false;
-                  });
-              showSnackBarText('UserName and Password Do not match');
 
               }
             }
@@ -146,71 +148,91 @@ class _LogIn_pageState extends State<LogIn_page> {
                     ),
                        Container(
                         width: MediaQuery.of(context).size.width*0.7,
-                         child: PasswordField(
-                      controller: PasswordController,
-  color: Colors.blue,
-  passwordConstraint: r'.*[@$#.*].*',
-  inputDecoration: PasswordDecoration(),
-  hintText: 'must have special characters',
-  border: PasswordBorder(
-    border: OutlineInputBorder(
-      borderSide: BorderSide(
-        color: Colors.blue.shade100,
-      ),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(
-        color: Colors.blue.shade100,
-      ),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    focusedErrorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide:
-          BorderSide(width: 2, color: Colors.red.shade200),
-    ),
-  ),
-  errorMessage:
-      'must contain special character either . * @ # \$',
-),
+                         child: PasswordTextField(
+                          controller: PasswordController,
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  hintText: 'Password',
+                ),
+              ),
+                          
                        ),
-                  // Container(
-                  //   width: MediaQuery.of(context).size.width*0.7,
-                   
-                  //   child: TextField(
-                  //   controller: PasswordController,
-                  //   obscureText: true,
-                  //   textAlign: TextAlign.center,
-                  //   style: TextStyle(color: Colors.blueGrey),
-                  //   onChanged: (value) {
-                  //     // password = value;
-                  //     //Do something with the user input.
-                  //   },
-                  //   decoration: InputDecoration(
-                      
-                  //               hintStyle: TextStyle(color: Colors.blueGrey),
-                  //               hintText: 'Enter your password.',
-                  //               contentPadding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
-                  //               border: OutlineInputBorder(
-                  //                 borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                  //               ),
-                  //               enabledBorder: OutlineInputBorder(
-                  //                 borderSide: BorderSide(color: Colors.blueGrey, width: 1.0),
-                  //                 borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                  //               ),
-                  //               focusedBorder: OutlineInputBorder(
-                  //                 borderSide: BorderSide(color: Colors.grey, width: 2.0),
-                  //                 borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                  //               ),
-                  //             )),
-                  // ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Forgot password'),
                       TextButton(
-                        onPressed: (){}, 
+                        onPressed: ()async{
+                          setState(() {
+                            modal=true;
+                          });
+await  _fireStore.collection('users') .where('phone', isEqualTo:countryCode+ PhoneController.text,)
+          .get()
+          .then((value) async { if(value.size > 0 ){
+            if(value.size == 1 ){
+            for(var data in value.docs){
+              userType = data.data()['usertype'];
+              isMultipleAcount=false;
+              print(isMultipleAcount);
+            }
+           
+            }else if(value.size > 1){
+              isMultipleAcount=true;
+              print(isMultipleAcount);
+            }else if(value.size == 0){
+               setState(() {
+                            modal=false;
+                          });
+               showSnackBarText('do not have acount create acount first');
+
+            }
+            }});
+if(modal==true){
+await   FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber:countryCode+ PhoneController.text,
+        // timeout: const Duration(seconds: 20),
+        verificationCompleted: (PhoneAuthCredential credential)async{
+          // await FirebaseAuth.instance.signInWithCredential(credential).then((value) => print('logged in'));
+          // modal=false;
+        }, 
+        verificationFailed: (FirebaseAuthException e){
+          setState(() {
+              modal=false;
+            });
+           
+          showSnackBarText("can't send code check if you have typed correct number");
+
+        }, 
+        codeSent: (String verificationId, int? resendToken) {
+        verId = verificationId;
+        setState(() {
+          print(verId);
+          print(PhoneController);
+          // screenState = 1;
+          modal=false;
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) =>!isMultipleAcount?Verify_otp(
+                  phoneNumber: PhoneController,
+                  countryCode: countryCode,
+                  verId: verId,
+                  userType: userType,
+                  isRecovering: true,
+                ):First_page(
+                  isRecovoring: true,
+                  verId: verId,
+                  phoneNumber:countryCode + PhoneController.text,
+                  )),
+              );
+        });
+      },
+      codeAutoRetrievalTimeout: (String verificationId){
+
+      });
+}
+
+                          // Navigator.push(context, MaterialPageRoute(builder: (context) => Verify_otp(userType: 'recover')));
+                        }, 
                         child: Text("Recover"))
                     ],
                   ),
@@ -250,9 +272,11 @@ class _LogIn_pageState extends State<LogIn_page> {
                       Text('Dont have an account'),
                       TextButton(
                         onPressed: (){
-                           Navigator.push(
+                           Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => First_page()));
+                MaterialPageRoute(builder: (context) => First_page(
+                  isRecovoring: false,
+                )));
                         }, 
                         child: Text("Create"))
                     ],

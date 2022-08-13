@@ -55,7 +55,9 @@ return Timer(duration, route);
  
  route()async{
 
-  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>firstRun? First_page():LogIn_page()));
+  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>firstRun? First_page(
+    isRecovoring: false,
+  ):LogIn_page()));
  }
 
   Widget build(BuildContext context) {

@@ -1,17 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:integrity/main.dart';
+import 'package:integrity/screens/login_page.dart';
 import 'package:integrity/screens/reviewer/Reviewer_pages/home_page.dart';
 
 
 class Success extends StatelessWidget {
   var userType;
+  bool isRecovering;
    Success({
+   required this.isRecovering,
    required this.userType
   });
 
   @override
   Widget build(BuildContext context) {
+   
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -31,7 +35,7 @@ class Success extends StatelessWidget {
                   child: Image.asset('assets/images/success.png'),
 
                 ),
-                      const Text("Profile Setup ",style: TextStyle(
+                       Text(!isRecovering?"Profile Setup":"Password Changed".toString(),style: TextStyle(
                                 fontSize: 30,
                                 color: Colors.blueGrey,
                                 fontWeight: FontWeight.w400
@@ -57,12 +61,18 @@ class Success extends StatelessWidget {
                          child: TextButton(
                           
                           onPressed: (){
+                            !isRecovering?
                              Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(builder: (context) => userType=="Reviewer"? Reviewer_Home_Page():Reviewer_Home_Page()
                                  )
+                              ):
+                               Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => LogIn_page()
+                                 )
                               );
-                          }, child: const Text("EXPLORE NOW",style: TextStyle(
+                          }, child: Text(isRecovering?"Sign in":"EXPLORE NOW",style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                             color: Colors.white

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:integrity/screens/first_page.dart';
 import 'package:integrity/screens/login_page.dart';
 // import 'package:integrity/screens/reviewer/verify_otp.dart';
 import 'package:integrity/screens/verify_otp.dart';
@@ -12,7 +13,9 @@ import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 class Register extends StatefulWidget {
   String userType;
+ 
   Register({
+   
     required this.userType
   });
 
@@ -39,8 +42,9 @@ class _RegisterState extends State<Register> {
       await  _fireStore.collection('users') .where('phone', isEqualTo: number)
           .get()
           .then((value) async { if(value.size > 0 ){
-           
-           for(var data in value.docs){
+
+           if(value.size==1){
+             for(var data in value.docs){
               print(data.data()['usertype']);
               if(widget.userType==data.data()['usertype']){
                  setState(() {
@@ -48,12 +52,22 @@ class _RegisterState extends State<Register> {
                   errorVisible=true;
                 });
                 showSnackBarText('can not have multiple accounts as ${widget.userType}');
+                
                 // print('match');
                 //   Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => Reviewer_Home_Page()));
               }else if(widget.userType!=data.data()['usertype']){
+               
               auth(number);
 
               }}
+           }else if(value.size>1){
+             setState(() {
+                  modal=false;
+                  errorVisible=true;
+                });
+                showSnackBarText('can not have multiple accounts as ${widget.userType}');
+           }
+          
           
           }else{
       auth(number);
@@ -95,6 +109,7 @@ class _RegisterState extends State<Register> {
                   countryCode: countryCode,
                   verId: verId,
                   userType: widget.userType,
+                  isRecovering: false,
                 )),
               );
         });
@@ -154,6 +169,19 @@ class _RegisterState extends State<Register> {
       child:ModalProgressHUD(
         inAsyncCall: modal,
         child: Scaffold(
+          appBar: AppBar(
+            leading: TextButton(
+              
+              onPressed: (){  
+                 Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => First_page(
+              isRecovoring: false,
+            )),
+              );
+              },
+               child: Icon(Icons.arrow_back_sharp,color: Colors.white,),),
+          ),
           backgroundColor: Colors.white,
           body: SingleChildScrollView(
             child: Center(
@@ -208,6 +236,19 @@ class _RegisterState extends State<Register> {
                         ),
                       ),
                     ),
+                     Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('I already have an account'),
+                      TextButton(
+                        onPressed: (){
+                           Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LogIn_page()));
+                        }, 
+                        child: Text("Log In"))
+                    ],
+                  ),
                     Container(
                       width: MediaQuery.of(context).size.width*0.7,
                       child: Visibility(
@@ -217,7 +258,7 @@ class _RegisterState extends State<Register> {
                           children: [
                               Column(
                                 children: [
-                                  Text("Acount already exists as a ",style: TextStyle(color: Colors.red),),
+                                  Text("Acount already exists ",style: TextStyle(color: Colors.red),),
                                    Text(" with this number",
                               style: TextStyle(color: Colors.red),),
                                 ],

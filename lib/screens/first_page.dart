@@ -1,11 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:integrity/screens/auth.dart';
+import 'package:integrity/screens/login_page.dart';
+import 'package:integrity/screens/verify_otp.dart';
 // import 'package:integrity/screens/reviewer/auth.dart';
 
 
 class First_page extends StatefulWidget {
-  First_page({Key? key}) : super(key: key);
+  var isRecovoring;
+  var phoneNumber;
+  
+  var verId;
+  First_page({
+    this.isRecovoring,
+    this.verId,
+    this.phoneNumber
+  });
 
   @override
   State<First_page> createState() => _First_pageState();
@@ -16,7 +26,16 @@ class _First_pageState extends State<First_page> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        
+        appBar: !widget.isRecovoring?AppBar(
+          leading: TextButton(
+            onPressed: (){
+               Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => LogIn_page()),
+                            );
+            },
+            child:Icon(Icons.arrow_back_sharp)),
+        ):null,
         body: Container(
           color: Colors.white,
           child: Column(
@@ -37,7 +56,7 @@ class _First_pageState extends State<First_page> {
                   
                   child: Column(
                     children:  [
-                     const Text("I am a...",style: TextStyle(
+                     Text(widget.isRecovoring?'select acount':"I am a...",style: TextStyle(
                       fontSize: 30,
                       color: Colors.blueGrey,
                       fontWeight: FontWeight.w700
@@ -56,9 +75,14 @@ class _First_pageState extends State<First_page> {
                        child: TextButton(
                         
                         onPressed: (){
-                           Navigator.push(
+                           Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => Register(userType: 'Reviewer',)),
+                              MaterialPageRoute(builder: (context) =>!widget.isRecovoring? Register(userType: 'Reviewer',):Verify_otp(
+                                userType: 'Reviewer',
+                                isRecovering: true,
+                                verId: widget.verId,
+                                phoneNumber: widget.phoneNumber,
+                                )),
                             );
                         }, child: const Text("REVIEWER",style: TextStyle(
                           fontSize: 15,
@@ -78,9 +102,13 @@ class _First_pageState extends State<First_page> {
                       width: MediaQuery.of(context).size.width*0.7,
                       height: 60,
                       child: TextButton(onPressed: (){
-                         Navigator.push(
+                         Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => Register(userType: 'Service Provider',)),
+                              MaterialPageRoute(builder: (context) =>!widget.isRecovoring? Register(userType: 'Service Provider',):Verify_otp(
+                                userType: 'Service Provider',
+                                verId: widget.verId,
+                                phoneNumber: widget.phoneNumber,
+                                isRecovering: true,)),
                             );
                       }, child: const Text("SERVICE PROVIDER",
                       style: TextStyle(

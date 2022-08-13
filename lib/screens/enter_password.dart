@@ -2,18 +2,21 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
+import 'package:fancy_password_field/fancy_password_field.dart';
 import 'package:flutter/material.dart';
 import 'package:integrity/screens/reviewer/Reviewer_pages/home_page.dart';
 // import 'package:integrity/screens/reviewer/success_register.dart';
 import 'package:integrity/screens/success_register.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
-import 'package:passwordfield/passwordfield.dart';
+
 
 
 class EnterPassword extends StatefulWidget {
     var phoneNumber;
     var userType;
+    var isRecovering=false;
   EnterPassword({
+    required this.isRecovering,
     required this.userType,
     this.phoneNumber
   });
@@ -27,14 +30,130 @@ class _EnterPasswordState extends State<EnterPassword> {
   bool modal=false;
   TextEditingController PasswordController=TextEditingController();
   final _fireStore = FirebaseFirestore.instance;
+  var whatUser='';
+  
+  bool errorVisible=false;
  
+  void recoverPassword()async{
+var bytes = utf8.encode(PasswordController.text); // data being hashed
 
+  var digest = sha256.convert(bytes);
+    setState(() {
+                    modal=true;
+                  });
+  await  _fireStore.collection('users').where('phone', isEqualTo:widget.phoneNumber,)
+          .get()
+          .then((value)async { if(value.size > 0 ){
+            
+                 for(var data in value.docs){
+                 if(value.size==1){
+                whatUser= data.reference.id;
+                 }else{
+                  if(data.data()['usertype']==widget.userType){
+                     whatUser= data.reference.id;
+                     print("user is ${whatUser}");
+                  }
+                 }
+              }
+               setState(() {
+                    modal=false;
+                  });
+
+          }},
+
+           
+          );
+  
+                   try {
+                        await _fireStore.collection('users').doc(whatUser).update({
+                            'password':digest.toString()
+                        }).then((value) => 
+                           Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => Success(
+                  userType:widget.userType,
+                  isRecovering: widget.isRecovering?true:false,
+                )))
+                        );
+
+                     
+
+                      } catch (e) {
+                        print(e);
+                      }
+
+  }
  
   void setPassword()async{
 // _fireStore.collection('users').add();
 var bytes = utf8.encode(PasswordController.text); // data being hashed
 
   var digest = sha256.convert(bytes);
+   await  _fireStore.collection('users') .where('phone', isEqualTo:widget.phoneNumber,)
+          .get()
+          .then((value) async { if(value.size > 0 ){
+            for(var data in value.docs){
+              data.data()['usertype'];
+              // print(PasswordController.text)  ;
+              if(digest.toString()==data.data()['password']){
+                print('match');
+                  setState(() {
+                    modal=false;
+                    errorVisible=true;
+                  });
+                
+
+              }else {
+
+                 setState(() {
+                    modal=true;
+                  });
+                   try {
+                        await _fireStore.collection('users').add(
+                            {'phone': widget.phoneNumber,
+                             "username":'',
+                             "password":digest.toString(),
+                             "usertype":widget.userType,
+                             });
+                        print('done');
+
+                        Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => Success(
+                  userType:widget.userType,
+                  isRecovering: widget.isRecovering?true:false,
+                )));
+
+                      } catch (e) {
+                        print(e);
+                      }
+
+              // showSnackBarText('UserName and Password Do not match');
+
+              }
+            }}else{
+               try {
+                        await _fireStore.collection('users').add(
+                            {'phone': widget.phoneNumber,
+                             "username":'',
+                             "password":digest.toString(),
+                             "usertype":widget.userType,
+                             });
+                        print('done');
+
+                        Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => Success(
+                  userType:widget.userType,
+                  isRecovering: widget.isRecovering?true:false,
+                )));
+
+                      } catch (e) {
+                        print(e);
+                      }
+
+            }
+            });
    try {
                         await _fireStore.collection('users').add(
                             {'phone': widget.phoneNumber,
@@ -47,7 +166,8 @@ var bytes = utf8.encode(PasswordController.text); // data being hashed
                         Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => Success(
-                  userType:widget.userType
+                  userType:widget.userType,
+                  isRecovering: widget.isRecovering?true:false,
                 )));
 
                       } catch (e) {
@@ -83,34 +203,82 @@ var bytes = utf8.encode(PasswordController.text); // data being hashed
                     ),
                     Container(
                       width: MediaQuery.of(context).size.width*0.7,
-                      child: PasswordField(
+                      child:FancyPasswordField(
                         controller: PasswordController,
-                      color: Colors.blue,
-                      // passwordConstraint: r'.*[@$#.*].*',
-                      inputDecoration: PasswordDecoration(),
-                      hintText: 'must have special characters',
-                      border: PasswordBorder(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.blue.shade100,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.blue.shade100,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              BorderSide(width: 2, color: Colors.blue.shade200),
+                validationRules: {
+                    DigitValidationRule(),
+                    // UppercaseValidationRule(),
+                    // LowercaseValidationRule(),
+                    SpecialCharacterValidationRule(),
+                    MinCharactersValidationRule(6),
+                    // MaxCharactersValidationRule(12),
+                },
+                
+                validationRuleBuilder: (rules, value) {
+                  if (value.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return ListView(
+                    shrinkWrap: true,
+                    children: rules
+                        .map(
+                          (rule) => rule.validate(value)
+                              ? Row(
+                                  children: [
+                                    const Icon(
+                                        Icons.check,
+                                        color: Colors.green,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                        rule.name,
+                                        style: const TextStyle(
+                                            color: Colors.green,
+                                        ),
+                                    ),
+                                  ],
+                                )
+                              : Row(
+                                  children: [
+                                    const Icon(
+                                        Icons.close,
+                                        color: Colors.red,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                        rule.name,
+                                        style: const TextStyle(
+                                            color: Colors.red,
+                                        ),
+                                    ),
+                                  ],
+                                ),
+                        )
+                        .toList(),
+                  );
+                },
+              ),
+
+                    ),
+                      Container(
+                      width: MediaQuery.of(context).size.width*0.7,
+                      child: Visibility(
+                        visible: errorVisible,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                              Column(
+                                children: [
+                                  Text("can't use the same password for",style: TextStyle(color: Colors.red),),
+                                   Text("diferent account ",
+                              style: TextStyle(color: Colors.red),),
+                                ],
+                              ),
+                             
+                           
+                          ],
                         ),
                       ),
-                      errorMessage:
-                          '',
-                    ),
                     ),
                   //     Container(
                   //   width: MediaQuery.of(context).size.width*0.7,
@@ -166,7 +334,8 @@ var bytes = utf8.encode(PasswordController.text); // data being hashed
                            child: TextButton(
                             
                             onPressed: (){
-                              setPassword();
+                            widget.isRecovering?  recoverPassword(): setPassword();
+                             
                             //   // print(countryCode+PhoneController.text);
                             //     var val=_formKey.currentState?.validate();
                             //   if (val ==true){
