@@ -8,9 +8,11 @@ import 'package:integrity/screens/login_page.dart';
 import 'package:is_first_run/is_first_run.dart';
 
 void main() async{
+ 
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(const MyApp());
+
 }
 
 class MyApp extends StatefulWidget {

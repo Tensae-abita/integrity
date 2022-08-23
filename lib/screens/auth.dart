@@ -8,6 +8,7 @@ import 'package:integrity/screens/first_page.dart';
 import 'package:integrity/screens/login_page.dart';
 // import 'package:integrity/screens/reviewer/verify_otp.dart';
 import 'package:integrity/screens/verify_otp.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
@@ -29,12 +30,25 @@ class _RegisterState extends State<Register> {
   final _fireStore = FirebaseFirestore.instance;
 
     var countryCode ="+251";
+    var Country='ET';
     var PhoneNUmber="";
     var verId='';
     bool errorVisible=false;
+   bool result = true;
+  checkConn()async{
+   result = await InternetConnectionChecker().hasConnection;
+   return result;
+   }
+
    
 
     Future<void> verifyPhone(var number) async{
+    await checkConn();
+
+    if(result==false){
+    showSnackBarText('YOU HAVE NO INTERNET CONNECTION');
+    }
+      
       setState(() {
             modal=true;
             errorVisible=false;
@@ -51,7 +65,10 @@ class _RegisterState extends State<Register> {
                   modal=false;
                   errorVisible=true;
                 });
+                if(result==true){
                 showSnackBarText('can not have multiple accounts as ${widget.userType}');
+
+                }
                 
                 // print('match');
                 //   Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => Reviewer_Home_Page()));
@@ -65,7 +82,10 @@ class _RegisterState extends State<Register> {
                   modal=false;
                   errorVisible=true;
                 });
+                if(result==true){
                 showSnackBarText('can not have multiple accounts as ${widget.userType}');
+
+                }
            }
           
           
@@ -80,6 +100,11 @@ class _RegisterState extends State<Register> {
        
         
       }
+@override
+void initState() {
+  super.initState();
+  checkConn();
+}
 
       Future<void> auth(var number)async{
            await   FirebaseAuth.instance.verifyPhoneNumber(
@@ -93,8 +118,10 @@ class _RegisterState extends State<Register> {
           setState(() {
               modal=false;
             });
-           
+           if(result==true){
           showSnackBarText("can't send code check if you have typed correct number");
+
+           }
 
         }, 
         codeSent: (String verificationId, int? resendToken) {
@@ -222,11 +249,15 @@ class _RegisterState extends State<Register> {
                                     borderRadius: BorderRadius.all(Radius.circular(20.0)),
                                 ),
                             ),
-                            initialCountryCode: 'ET',
+                            initialCountryCode: Country,
                             initialValue: countryCode,
                             onCountryChanged: (country){
                               setState(() {
+                                Country=country.code;
+
+                                print(Country);
                                 countryCode="+" +country.dialCode;
+                                print(countryCode);
                               });
                               
                             },

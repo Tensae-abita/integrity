@@ -44,6 +44,7 @@ dependencies:
   crypto: ^3.0.2
   password_text_field: ^1.0.1
   fancy_password_field: ^1.0.4
+  internet_connection_checker: ^0.0.1+4
   
 
 
