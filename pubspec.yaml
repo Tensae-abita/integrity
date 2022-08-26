@@ -45,6 +45,8 @@ dependencies:
   password_text_field: ^1.0.1
   fancy_password_field: ^1.0.4
   internet_connection_checker: ^0.0.1+4
+  expandable: ^5.0.1
+
   
 
 

@@ -8,6 +8,7 @@ import 'package:integrity/screens/first_page.dart';
 import 'package:integrity/screens/reviewer/Reviewer_pages/home_page.dart';
 import 'package:integrity/screens/service_provider/service_home_page.dart';
 import 'package:integrity/screens/verify_otp.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 // import 'package:integrity/screens/reviewer/auth.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
@@ -36,8 +37,22 @@ class _LogIn_pageState extends State<LogIn_page> {
     var isMultipleAcount;
 
   bool modal=false;
+    bool result = true;
+  checkConn()async{
+   result = await InternetConnectionChecker().hasConnection;
+   return result;
+   }
 
   Future<void> userSignIn() async {
+     setState(() {
+      
+      modal=true;
+    });
+     await checkConn();
+
+    if(result==false){
+    showSnackBarText('Please check your Internet Connection');
+    }
     var bytes = utf8.encode(PasswordController.text); // data being hashed
 
   var digest = sha256.convert(bytes);
@@ -71,7 +86,10 @@ class _LogIn_pageState extends State<LogIn_page> {
                setState(() {
                     modal=false;
                   });
+                  if(result==true){
               showSnackBarText('UserName and Password Do not match');
+
+                  }
             }
           });
   }
