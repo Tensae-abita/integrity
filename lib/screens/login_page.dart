@@ -6,13 +6,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:integrity/screens/first_page.dart';
 import 'package:integrity/screens/reviewer/Reviewer_pages/home_page.dart';
-import 'package:integrity/screens/service_provider/service_home_page.dart';
 import 'package:integrity/screens/verify_otp.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 // import 'package:integrity/screens/reviewer/auth.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:password_text_field/password_text_field.dart';
+
+import '../views/service_provider/service_home_page.dart';
 
 
 
@@ -269,7 +270,9 @@ await   FirebaseAuth.instance.verifyPhoneNumber(
                            child: TextButton(
                             
                             onPressed: (){
-                              userSignIn();
+
+                              Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => Provider_Home_Page()));
+                              //userSignIn();
                               
                             //   // print(countryCode+PhoneController.text);
                             //     var val=_formKey.currentState?.validate();
