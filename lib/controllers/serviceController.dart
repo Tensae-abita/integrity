@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:get/state_manager.dart';
@@ -17,7 +18,7 @@ class ServiceController extends GetxController{
   {
     firestore.collection('services').add(service.toJson()).
     then((value) => {
-      Get.snackbar('success','Service Created',snackPosition: SnackPosition.BOTTOM)
+      Get.snackbar('','Service Saved Successfully',snackPosition: SnackPosition.BOTTOM,backgroundColor: Colors.black,colorText: Colors.white),
     }).
     catchError((error) => {
       Get.snackbar('Error',error,snackPosition: SnackPosition.BOTTOM)
