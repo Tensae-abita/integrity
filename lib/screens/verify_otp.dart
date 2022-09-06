@@ -17,7 +17,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Verify_otp extends StatefulWidget {
   var phoneNumber;
   var countryCode;
-  var country;
   var verId;
   var userType;
   var isRecovering =false;
@@ -26,8 +25,7 @@ class Verify_otp extends StatefulWidget {
    required this.isRecovering,
     this.userType,
     this.verId,
-    this.countryCode,
-     this.country
+    this.countryCode
     
    }
   );
@@ -109,8 +107,9 @@ await FirebaseAuth.instance.signInWithCredential(
                 MaterialPageRoute(builder: (context) => EnterPassword(
                   isRecovering: widget.isRecovering,
                   userType: widget.userType,
-                  phoneNumber:widget.countryCode+widget.phoneNumber.text.toString(),
-                userId: value.user!.uid,country: widget.country,)));
+                  phoneNumber:widget.phoneNumber,)));
+
+               
         }
         );
    } catch (e){
@@ -177,7 +176,7 @@ await FirebaseAuth.instance.signInWithCredential(
                    
                   ),),
                   SizedBox(height:5),
-                  Text(!widget.isRecovering? widget.countryCode +" "+ widget.phoneNumber.text:widget.phoneNumber.text),
+                  Text(!widget.isRecovering? widget.countryCode +" "+ widget.phoneNumber.text:widget.phoneNumber),
                   SizedBox(
                     height: 50,
                   ),
@@ -187,7 +186,6 @@ await FirebaseAuth.instance.signInWithCredential(
                     length: 6,
                     obscureText: false,
                     animationType: AnimationType.fade,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     pinTheme: PinTheme(
                       selectedColor:Colors.green[900],
                       selectedFillColor:Colors.green[900],

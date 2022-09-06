@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:integrity/screens/first_page.dart';
 import 'package:integrity/screens/reviewer/Reviewer_pages/home_page.dart';
 import 'package:integrity/screens/verify_otp.dart';
@@ -13,6 +12,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:password_text_field/password_text_field.dart';
+
 import '../views/service_provider/service_home_page.dart';
 
 
@@ -25,8 +25,6 @@ class LogIn_page extends StatefulWidget {
 }
 
 class _LogIn_pageState extends State<LogIn_page> {
-
-  final box = GetStorage();
       GlobalKey<FormState> _formKey = GlobalKey();
     TextEditingController PhoneController=TextEditingController();
     TextEditingController PasswordController=TextEditingController();
@@ -60,14 +58,13 @@ class _LogIn_pageState extends State<LogIn_page> {
 
   var digest = sha256.convert(bytes);
     setState(() {
+      
       modal=true;
     });
     print(digest);
-    print(countryCode+ PhoneController.text);
     await  _fireStore.collection('users') .where('phone', isEqualTo:countryCode+ PhoneController.text,)
           .get()
-          .then((value) async { if(value.size > 0 )
-          {
+          .then((value) async { if(value.size > 0 ){
             for(var data in value.docs){
               
               // print(PasswordController.text)  ;
@@ -75,7 +72,6 @@ class _LogIn_pageState extends State<LogIn_page> {
                 print('match');
                   setState(() {
                     modal=false;
-                    box.write('id', data.data()['userid']);
                   });
                   if(data.data()['usertype']=="Reviewer"){
                   Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => Reviewer_Home_Page()));
@@ -92,7 +88,7 @@ class _LogIn_pageState extends State<LogIn_page> {
                     modal=false;
                   });
                   if(result==true){
-              showSnackBarText('UserName or Password Do not match');
+              showSnackBarText('UserName and Password Do not match');
 
                   }
             }
@@ -169,7 +165,7 @@ class _LogIn_pageState extends State<LogIn_page> {
                       ),
                       
                     ),
-                    Container(
+                       Container(
                         width: MediaQuery.of(context).size.width*0.7,
                          child: PasswordTextField(
                           controller: PasswordController,
@@ -180,7 +176,7 @@ class _LogIn_pageState extends State<LogIn_page> {
               ),
                           
                        ),
-                    Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Forgot password'),
@@ -259,7 +255,10 @@ await   FirebaseAuth.instance.verifyPhoneNumber(
                         child: Text("Recover"))
                     ],
                   ),
-                    SizedBox(height: 20,),
+
+                    SizedBox(
+                      height: 20,
+                    ),
                     Container(
                      
                          decoration: BoxDecoration(
@@ -272,8 +271,8 @@ await   FirebaseAuth.instance.verifyPhoneNumber(
                             
                             onPressed: (){
 
-                      //        Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => Provider_Home_Page()));
-                              userSignIn();
+                              Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => Provider_Home_Page()));
+                              //userSignIn();
                               
                             //   // print(countryCode+PhoneController.text);
                             //     var val=_formKey.currentState?.validate();
@@ -282,8 +281,7 @@ await   FirebaseAuth.instance.verifyPhoneNumber(
                                   
                             //     // verifyPhone(countryCode+PhoneController.text);
                             //  }
-                            },
-                               child: Text("Sign In",style: TextStyle(
+                            }, child: Text("Sign In",style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
                               color: Colors.white

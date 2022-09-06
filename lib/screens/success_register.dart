@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:integrity/main.dart';
 import 'package:integrity/screens/login_page.dart';
 import 'package:integrity/screens/reviewer/Reviewer_pages/home_page.dart';
-import 'package:integrity/views/service_provider/service_home_page.dart';
 
 
 class Success extends StatelessWidget {
@@ -65,7 +64,7 @@ class Success extends StatelessWidget {
                             !isRecovering?
                              Navigator.pushReplacement(
                                 context,
-                                MaterialPageRoute(builder: (context) => userType=="Reviewer"? Reviewer_Home_Page():Provider_Home_Page()
+                                MaterialPageRoute(builder: (context) => userType=="Reviewer"? Reviewer_Home_Page():Reviewer_Home_Page()
                                  )
                               ):
                                Navigator.pushReplacement(

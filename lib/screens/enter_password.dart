@@ -14,15 +14,11 @@ import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 class EnterPassword extends StatefulWidget {
     var phoneNumber;
     var userType;
-    var userId;
     var isRecovering=false;
-    var country;
   EnterPassword({
     required this.isRecovering,
     required this.userType,
-    this.phoneNumber,
-    this.userId,
-    this.country
+    this.phoneNumber
   });
 
   @override
@@ -80,6 +76,8 @@ var bytes = utf8.encode(PasswordController.text); // data being hashed
                 )))
                         );
 
+                     
+
                       } catch (e) {
                         print(e);
                       }
@@ -88,32 +86,12 @@ var bytes = utf8.encode(PasswordController.text); // data being hashed
  
   void setPassword()async{
 // _fireStore.collection('users').add();
- var bytes = utf8.encode(PasswordController.text.toString()); // data being hashed
+var bytes = utf8.encode(PasswordController.text); // data being hashed
 
-   var digest = sha256.convert(bytes);
-
-   await _fireStore.collection('users').add(
-     {'phone': widget.phoneNumber,
-       "userid":widget.userId,
-       "userCountry":widget.country,
-       "password":digest.toString(),
-       "usertype":widget.userType,
-     }).then((value) => {
-       if(value.id.length > 0)
-         Navigator.pushReplacement(
-         context,
-         MaterialPageRoute(builder: (context) => Success(
-         userType:widget.userType,
-         isRecovering: widget.isRecovering?true:false,
-         )))
-   }).onError((error, stackTrace) => {
-   });
-
-   /*await  _fireStore.collection('users') .where('phone', isEqualTo:widget.phoneNumber,)
+  var digest = sha256.convert(bytes);
+   await  _fireStore.collection('users') .where('phone', isEqualTo:widget.phoneNumber,)
           .get()
-          .then((value) async {
-            if(value.size > 0 )
-            {
+          .then((value) async { if(value.size > 0 ){
             for(var data in value.docs){
               data.data()['usertype'];
               // print(PasswordController.text)  ;
@@ -125,8 +103,8 @@ var bytes = utf8.encode(PasswordController.text); // data being hashed
                   });
                 
 
-              }
-              else {
+              }else {
+
                  setState(() {
                     modal=true;
                   });
@@ -153,8 +131,7 @@ var bytes = utf8.encode(PasswordController.text); // data being hashed
               // showSnackBarText('UserName and Password Do not match');
 
               }
-            }}
-            else{
+            }}else{
                try {
                         await _fireStore.collection('users').add(
                             {'phone': widget.phoneNumber,
@@ -177,7 +154,7 @@ var bytes = utf8.encode(PasswordController.text); // data being hashed
 
             }
             });
-           try {
+   try {
                         await _fireStore.collection('users').add(
                             {'phone': widget.phoneNumber,
                              "username":'',
@@ -195,7 +172,7 @@ var bytes = utf8.encode(PasswordController.text); // data being hashed
 
                       } catch (e) {
                         print(e);
-                      }*/
+                      }
 
   }
   @override

@@ -55,9 +55,8 @@ class _RegisterState extends State<Register> {
           });
       await  _fireStore.collection('users') .where('phone', isEqualTo: number)
           .get()
-          .then((value) async {
-            if(value.size > 0 )
-            {
+          .then((value) async { if(value.size > 0 ){
+
            if(value.size==1){
              for(var data in value.docs){
               print(data.data()['usertype']);
@@ -78,8 +77,7 @@ class _RegisterState extends State<Register> {
               auth(number);
 
               }}
-           }
-           else if(value.size>1){
+           }else if(value.size>1){
              setState(() {
                   modal=false;
                   errorVisible=true;
@@ -91,9 +89,9 @@ class _RegisterState extends State<Register> {
            }
           
           
-          }
-            else{
-            auth(number);
+          }else{
+      auth(number);
+            
           }
           
           });
@@ -121,7 +119,7 @@ void initState() {
               modal=false;
             });
            if(result==true){
-          showSnackBarText("can't send code check if you have typed correct number:"+e.toString());
+          showSnackBarText("can't send code check if you have typed correct number");
 
            }
 
@@ -139,7 +137,6 @@ void initState() {
                   verId: verId,
                   userType: widget.userType,
                   isRecovering: false,
-                  country: Country,
                 )),
               );
         });
