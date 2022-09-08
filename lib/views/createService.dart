@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:country_state_city_picker/country_state_city_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -25,8 +26,6 @@ class _CreateServiceState extends State<CreateService> {
   TextEditingController serviceNameController=TextEditingController();
   TextEditingController serviceCategoryController=TextEditingController();
   TextEditingController serviceDescriptionController=TextEditingController();
-  TextEditingController cityController=TextEditingController();
-  TextEditingController countryController=TextEditingController();
   TextEditingController pinCodeController=TextEditingController();
   TextEditingController webLinkController=TextEditingController();
   TextEditingController zoomLinkController=TextEditingController();
@@ -41,6 +40,10 @@ class _CreateServiceState extends State<CreateService> {
 
   bool saving=false;
   double lat=0,long=0;
+  double fromTime=0,toTime=0;
+  late String countryValue;
+  late String stateValue;
+  late String cityValue;
   List<String> days=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 
   List<String> searchSuggestion(String query)=>
@@ -50,7 +53,7 @@ class _CreateServiceState extends State<CreateService> {
             return numberLower.contains(queryLower);
       }).toList();
 
- Future<String> _selectTime(BuildContext context) async {
+ Future<TimeOfDay> _selectTime(BuildContext context) async {
     TimeOfDay selectedTime = TimeOfDay.now();
 
     final TimeOfDay? timeOfDay = await showTimePicker(
@@ -64,7 +67,7 @@ class _CreateServiceState extends State<CreateService> {
         selectedTime = timeOfDay;
       });
     }
-     return selectedTime.format(context);
+     return selectedTime;
   }
 
 
@@ -122,8 +125,8 @@ class _CreateServiceState extends State<CreateService> {
    else
      {
        ServiceModel model=ServiceModel(userId!,serviceNameController.text, widget.category, serviceDescriptionController.text,
-           startTimeController.text, endTimeController.text, startDayController.text, endDayController.text
-       ,cityController.text,countryController.text,pinCodeController.text,lat.toString(),long.toString(),emailController.text,
+           startTimeController.text, endTimeController.text, startDayController.text, endDayController.text,
+       countryValue,stateValue,cityValue,pinCodeController.text,lat.toString(),long.toString(),emailController.text,
            upiController.text,watsAppController.text
        ,telegramController.text,zoomLinkController.text,webLinkController.text);
        ServiceController controller=Get.put(ServiceController());
@@ -145,7 +148,7 @@ class _CreateServiceState extends State<CreateService> {
         {
           for(var data in value.docs)
             {
-              countryController.text=data.data()['userCountry'],
+              countryValue=data.data()['userCountry'],
             }
         });
       }
@@ -313,9 +316,10 @@ class _CreateServiceState extends State<CreateService> {
                                          )),
                                          IconButton(icon: Icon(Icons.access_time,color: Colors.blue,),
                                            onPressed: () async{
-                                             String t=await _selectTime(this.context);
+                                             TimeOfDay t=await _selectTime(this.context);
                                              setState((){
-                                               startTimeController.text=t;
+                                               fromTime=t.hour.toDouble()+(t.minute.toDouble() / 60);
+                                               startTimeController.text=t.format(this.context);
                                              });
                                            },
                                          )
@@ -356,6 +360,10 @@ class _CreateServiceState extends State<CreateService> {
                                                  if (value == null || value.isEmpty) {
                                                    return 'Please select a Time';
                                                  }
+                                                 else if(fromTime>=toTime)
+                                                   {
+                                                     return 'Please change the end time';
+                                                   }
                                                  return null;
                                                },
                                                onTap: (){
@@ -364,9 +372,10 @@ class _CreateServiceState extends State<CreateService> {
                                              )),
                                          IconButton(icon: Icon(Icons.access_time,color: Colors.blue,),
                                            onPressed: () async{
-                                             String t=await _selectTime(this.context);
+                                             TimeOfDay t=await _selectTime(this.context);
                                              setState((){
-                                               endTimeController.text=t;
+                                               toTime=t.hour.toDouble()+(t.minute.toDouble() / 60);
+                                               endTimeController.text=t.format(context);
                                              });
                                            },
                                          )
@@ -459,53 +468,26 @@ class _CreateServiceState extends State<CreateService> {
                          ),
                        ),
                        SizedBox(height: 20,),
-                       TextFormField(
-                         controller: countryController,
-                         readOnly: true,
-                         style:  TextStyle(
-                             color: Colors.black87, fontSize: 16),
-                         decoration: InputDecoration(
-                             enabledBorder: new OutlineInputBorder(
-                               borderRadius: new BorderRadius.circular(15.0),
-                               borderSide:  BorderSide(color:  Colors.grey.shade200 ),
 
-                             ),
-                             focusedBorder: new OutlineInputBorder(
-                               borderRadius: new BorderRadius.circular(15.0),
-                               borderSide:  BorderSide(color:  Colors.cyan.shade700 ),
-
-                             ),
-                             filled: true,
-                             hintStyle: TextStyle(color: Colors.grey.shade500,fontSize: 14),
-                             hintText: "Type Country name",
-                             fillColor: Colors.grey.shade200),
-                         onTap: (){
-
+                       SelectState(
+                         onCountryChanged: (value) {
+                           setState(() {
+                            countryValue= value;
+                           });
                          },
-                       ),
-                       SizedBox(height: 20,),
-                       TextFormField(
-                         controller: cityController,
-                         style:  TextStyle(color: Colors.black87, fontSize: 16),
-                         decoration: InputDecoration(
-                             enabledBorder: new OutlineInputBorder(
-                               borderRadius: new BorderRadius.circular(15.0),
-                               borderSide:  BorderSide(color:  Colors.grey.shade200 ),
-
-                             ),
-                             focusedBorder: new OutlineInputBorder(
-                               borderRadius: new BorderRadius.circular(15.0),
-                               borderSide:  BorderSide(color:  Colors.cyan.shade700 ),
-
-                             ),
-                             filled: true,
-                             hintStyle: TextStyle(color: Colors.grey.shade500,fontSize: 14),
-                             hintText: "Type City name",
-                             fillColor: Colors.grey.shade200),
-                         onTap: (){
-
+                         onStateChanged:(value) {
+                           setState(() {
+                            stateValue = value;
+                           });
                          },
+                         onCityChanged:(value) {
+                           setState(() {
+                             cityValue = value;
+                           });
+                         },
+
                        ),
+
                        SizedBox(height: 20,),
                        TextFormField(
                          controller:pinCodeController ,

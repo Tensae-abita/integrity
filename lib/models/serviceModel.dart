@@ -7,8 +7,9 @@ class ServiceModel{
   late String availabilityEndTime;
   late String availabilityStartDate;
   late String availabilityEndDate;
-  late String city;
   late String country;
+  late String state;
+  late String city;
   late String pinCode;
   late String latitude;
   late String longitude;
@@ -21,7 +22,7 @@ class ServiceModel{
 
   ServiceModel(this.userId,this.name,this.categoryName,this.description,
       this.availabilityStartTime,this.availabilityEndTime,
-      this.availabilityStartDate,this.availabilityEndDate,this.city,this.country,this.pinCode,this.latitude,this.longitude,
+      this.availabilityStartDate,this.availabilityEndDate,this.country,this.state,this.city,this.pinCode,this.latitude,this.longitude,
       this.email,this.upiLink,this.watsApp,this.telegram,this.zoom,this.webAddress);
 
   ServiceModel.fromJson(Map<String,dynamic> json){
@@ -33,8 +34,9 @@ class ServiceModel{
     availabilityEndTime=json['endTime'].toString();
     availabilityStartDate=json['startDate'].toString();
     availabilityEndDate=json['endDate'].toString();
-    city=json['city'].toString();
     country=json['country'].toString();
+    country=json['state'].toString();
+    city=json['city'].toString();
     pinCode=json['pinCode'].toString();
     latitude=json['latitude'].toString();
     longitude=json['longitude'].toString();
@@ -56,8 +58,9 @@ class ServiceModel{
     data['endTime'] = this.availabilityEndTime;
     data['startDate'] = this.availabilityStartDate;
     data['endDate'] = this.availabilityEndDate;
-    data['city'] = this.city;
     data['country'] = this.country;
+    data['state'] = this.state;
+    data['city'] = this.city;
     data['pinCode'] = this.pinCode;
     data['latitude'] = this.latitude;
     data['longitude'] = this.longitude;
